@@ -1,11 +1,8 @@
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-<meta charset="UTF-8">
-<title>サインイン</title>
-<link rel="stylesheet" type="text/css" th:href="@{/css/todo.css}">
+	<link rel="stylesheet" type="text/css" th:href="@{/css/todo.css}">
 </head>
 <body>
  <div class="form_back sd">
@@ -15,12 +12,12 @@
     <div th:if="${param.error}">
      <div>UserNameまたは、Passwordが違います。</div>
     </div>
-    <form method="post" th:action="@{/authenticate}"
+    <form method="post" th:action="@{/login}"
      style="width: 400px">
-     <div class="form_box_inner">
-      <p class="text sd">ユーザーID</p>
-      <input class="item" type="text" id="userName" name="userName">
-     </div>
+	 <div class="form_box_inner">
+	       <p class="text sd">ユーザーID</p>
+	       <input class="item" type="text" id="userName" name="username">
+	      </div>
      <div class="form_box_inner">
       <p class="text sd">パスワード</p>
       <input class="item sd" type="password" id="password"
