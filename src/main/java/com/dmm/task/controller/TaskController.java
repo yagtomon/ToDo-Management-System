@@ -139,9 +139,13 @@ public class TaskController {
      */
     @GetMapping("/main/edit/{id}")
     public String editForm(@PathVariable Long id, Model model) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
-        model.addAttribute("task", task);
-        return "edit"; // edit.htmlへ遷移
+        // taskRepository.findById(id).orElseThrow()などでタスクを取得しているか
+        Task task = taskRepository.findById(id).orElse(null); 
+        if (task == null) {
+            // エラーハンドリング
+        }
+        model.addAttribute("task", task); // taskオブジェクトをModelに格納しているか
+        return "edit"; // edit.htmlを返しているか
     }
     
     /**

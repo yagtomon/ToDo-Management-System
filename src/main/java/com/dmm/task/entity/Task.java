@@ -2,15 +2,16 @@ package com.dmm.task.entity;
 
 import java.time.LocalDate;
 
-// ★★★ 必須インポートの追加/確認 ★★★
-import jakarta.persistence.Column; // @Column のインポート
-import jakarta.persistence.Entity; // @Entity のインポート
-import jakarta.persistence.GeneratedValue; // @GeneratedValue のインポート
-import jakarta.persistence.GenerationType; // GenerationType のインポート
-import jakarta.persistence.Id; // @Id のインポート
-import jakarta.persistence.Table; // @Table のインポート
-// バリデーションに必要なインポート
-import jakarta.validation.constraints.NotNull; 
+// ★★★ 削除されてしまうインポートをすべて記述する ★★★
+import jakarta.persistence.Column; 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Table;
+
+// 以下の1行を追加する
+import jakarta.validation.constraints.NotNull; // 👈 この行を追加
 
 @Entity
 @Table(name = "tasks") 
@@ -29,7 +30,7 @@ public class Task {
     private String userLoginId;
 
     @Column(nullable = false)
-    @NotNull(message = "実施日を入力してください")
+    @NotNull(message = "実施日を入力してください") 
     private LocalDate date; // 実施日
     
     private boolean done = false; // 完了フラグ
