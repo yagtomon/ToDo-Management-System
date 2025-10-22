@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -22,35 +21,34 @@
  <div class="form_back sd">
   <div class="form sd">
    <div class="title sd">Edit</div>
-   <form method="post" th:action="@{/main/edit/{id}(id=${task.id})}">
+   
+   <form method="post" th:action="@{/main/edit/{id}(id=${task.id})}" th:object="${task}">
     <div class="sd">
+     
+     <input type="hidden" th:field="*{id}" />
+
      <div class="form_row sd">
       <p class="form_text sd">タイトル：</p>
       <div class="form_item">
-       <input type="text" name="title" class="item"
-        th:value="${task.title}">
+       <input type="text" th:field="*{title}" class="item">
       </div>
      </div>
      <div class="form_row sd">
       <p class="form_text sd">日付：</p>
       <div class="form_item">
-       <input type="date" name="date"
-        th:value="${#temporals.format(task.date, 'yyyy-MM-dd')}"
-        class="item">
+       <input type="date" th:field="*{date}" class="item">
       </div>
      </div>
      <div class="form_row sd">
       <p class="form_text sd">内容:</p>
       <div class="form_item">
-       <textarea name="text" cols="80" rows="10" class="item"
-        th:text="${task.text}"></textarea>
+       <textarea th:field="*{text}" cols="80" rows="10" class="item"></textarea>
       </div>
      </div>
      <div class="form_row sd">
       <p class="form_text sd">完了：</p>
       <div class="form_item">
-       <input type="checkbox" name="done" th:checked="${task.done}"
-        class="checkbox">
+       <input type="checkbox" th:field="*{done}" class="checkbox">
       </div>
      </div>
      <button class="form_button sd">
@@ -58,6 +56,7 @@
      </button>
     </div>
    </form>
+   
    <form th:action="@{'/main/delete/' + ${task.id}}" th:method="post"
     class="form_box sd" style="width: 100%; max-width: 100%">
     <button class="form_button delete sd">

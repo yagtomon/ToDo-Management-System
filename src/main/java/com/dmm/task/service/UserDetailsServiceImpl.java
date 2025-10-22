@@ -1,15 +1,20 @@
 package com.dmm.task.service;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service; // ★追加★
 
+import com.dmm.task.entity.Users;
 import com.dmm.task.repository.UserRepository;
 
-// @Service
+@Service // ★有効化★
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -20,17 +25,25 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        com.dmm.task.entity.User user = userRepository.findByLoginId(username)
+        Users user = userRepository.findByLoginId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // データベースから取得したユーザー情報 (Userエンティティ) を、
-        // Spring Securityが利用できる UserDetails型 (ここではUserクラス) に変換して返す。
-        // ※ここでは、権限 (Roles) は実装をシンプルにするため空にしています。
-        // 管理者要件を満たすためには、UserエンティティにRoleを持たせ、ここに含める必要があります。
+        // 権限を設定するためのリストを作成
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        
+        // すべてのユーザーに最低限の権限 (ROLE_USER) を付与
+        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        
+        // loginIdが "admin" の場合は、管理者権限 (ROLE_ADMIN) を追加
+        if ("admin".equals(user.getLoginId())) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
+
+        // データベースから取得したユーザー情報と権限を使って UserDetails を作成
         return new User(
             user.getLoginId(),
             user.getPassword(), // BCryptでエンコードされたパスワード
-            Collections.emptyList() // ユーザーの権限
+            authorities         // 設定された権限
         );
     }
 }

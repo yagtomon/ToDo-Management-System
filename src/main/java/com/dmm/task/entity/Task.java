@@ -3,41 +3,40 @@ package com.dmm.task.entity;
 import java.time.LocalDate;
 
 // ★★★ 削除されてしまうインポートをすべて記述する ★★★
-import jakarta.persistence.Column; 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Table;
-
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
 // 以下の1行を追加する
-import jakarta.validation.constraints.NotNull; // 👈 この行を追加
+import javax.validation.constraints.NotNull; // 👈 この行を追加
 
 @Entity
-@Table(name = "tasks") 
+@Table(name = "tasks")
 public class Task {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
+    private Long id;
 
     private String title;
 
-    @Column(nullable = true) 
-    private String text; 
+    @Column(nullable = true)
+    private String text;
     
-    @Column(name = "user_login_id", nullable = false) 
+    @Column(name = "user_login_id", nullable = false)
     private String userLoginId;
 
     @Column(nullable = false)
-    @NotNull(message = "実施日を入力してください") 
+    @NotNull(message = "実施日を入力してください")
     private LocalDate date; // 実施日
     
     private boolean done = false; // 完了フラグ
 
     // --- getter / setter ---
     
-    public Long getId() { 
+    public Long getId() {
         return id;
     }
     public void setId(Long id) {

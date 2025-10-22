@@ -29,24 +29,24 @@
       <p class="form_text sd">タイトル：</p>
       <div class="form_item">
        <input type="text" th:field="*{title}" class="item">
-       <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="error"></span>
       </div>
+      <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="error"></span>
      </div>
      
      <div class="form_row sd">
       <p class="form_text sd">日付：</p>
       <div class="form_item">
        <input type="date" th:field="*{date}" class="item">
-       <span th:if="${#fields.hasErrors('date')}" th:errors="*{date}" class="error"></span>
       </div>
+      <span th:if="${#fields.hasErrors('date')}" th:errors="*{date}" class="error"></span>
      </div>
      
      <div class="form_row sd">
       <p class="form_text sd">内容:</p>
       <div class="form_item">
        <textarea th:field="*{text}" cols="80" rows="10" class="item"></textarea>
-       <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="error"></span>
       </div>
+      <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="error"></span>
      </div>
      
      <button class="form_button sd">

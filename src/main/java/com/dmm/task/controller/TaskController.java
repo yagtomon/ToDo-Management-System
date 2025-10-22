@@ -13,8 +13,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult; // ★ 追記
-import org.springframework.validation.annotation.Validated; // ★ 追記
+import org.springframework.validation.BindingResult; 
+import org.springframework.validation.annotation.Validated; 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +35,7 @@ public class TaskController {
     
     // 現在の認証ユーザーが管理者かチェックするヘルパーメソッド
     private boolean isAdmin(UserDetails userDetails) {
-        return "admin".equals(userDetails.getUsername());
+        return userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
     }
 
     /**
@@ -59,21 +59,25 @@ public class TaskController {
                 userDetails.getUsername(), firstDayOfMonth, lastDayOfMonth
             );
         }
+        
         Map<LocalDate, List<Task>> tasksMap = new HashMap<>();
         for (Task task : tasks) {
             tasksMap.computeIfAbsent(task.getDate(), k -> new ArrayList<>()).add(task);
         }
+        
         String month = targetDate.format(DateTimeFormatter.ofPattern("yyyy年M月"));
         model.addAttribute("month", month);
         LocalDate prev = firstDayOfMonth.minusMonths(1);
         LocalDate next = firstDayOfMonth.plusMonths(1);
-        model.addAttribute("prev", prev); 
+        model.addAttribute("prev", prev);
         model.addAttribute("next", next);
         model.addAttribute("tasks", tasksMap);
+        
         LocalDate calendarStart = firstDayOfMonth;
         while (calendarStart.getDayOfWeek() != DayOfWeek.SUNDAY) {
              calendarStart = calendarStart.minusDays(1);
         }
+        
         List<List<LocalDate>> matrix = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             List<LocalDate> week = new ArrayList<>();
@@ -82,7 +86,7 @@ public class TaskController {
             }
             matrix.add(week);
         }
-        model.addAttribute("matrix", matrix); 
+        model.addAttribute("matrix", matrix);
         model.addAttribute("loginUser", userDetails.getUsername());
 
         return "main"; // main.htmlへ遷移
@@ -97,35 +101,33 @@ public class TaskController {
     }
 
     /**
-     * タスク登録画面を表示します (HTMLに合わせてパスを /main/create/{date} に変更)
+     * タスク登録画面を表示します
      */
     @GetMapping("/main/create/{date}")
-    public String showCreateForm(@PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, Model model) {
+    public String showCreateForm(
+        @PathVariable("date") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, 
+        Model model) {
+        
         Task task = new Task();
         task.setDate(date);
-        // ★ 必須: Taskオブジェクトを "task" という名前でモデルに追加する
-        model.addAttribute("task", task); 
-        // ★ 任意: テンプレートで日付表示に使われていた "date" 属性はもう不要かもしれません
-        // model.addAttribute("date", date); 
+        model.addAttribute("task", task);
+        
         return "create";
     }
 
     /**
-     * タスクを登録処理します (HTMLに合わせてパスを /main/create に変更)
+     * タスクを登録処理します
      */
     @PostMapping("/main/create")
-    // ★修正1: @ValidatedとBindingResultを追加してバリデーションを有効にする
     public String registerTask(
-            @Validated @ModelAttribute Task task, 
-            BindingResult bindingResult, 
+            @Validated @ModelAttribute Task task,
+            BindingResult bindingResult,
             @AuthenticationPrincipal UserDetails userDetails) {
         
-        // ★修正2: バリデーションエラーがあればフォームに戻る
         if (bindingResult.hasErrors()) {
             return "create";
         }
         
-        // ログインユーザーIDを設定
         task.setUserLoginId(userDetails.getUsername());
         
         taskRepository.save(task);
@@ -133,75 +135,58 @@ public class TaskController {
         return "redirect:/main"; // カレンダー画面にリダイレクト
     }
 
-
+    // ----------------------------------------------------------------------
+    // ★★★★ 以下のメソッドを編集フォーム表示用に修正 ★★★★
+    // ----------------------------------------------------------------------
     /**
-     * タスク編集画面を表示します (HTMLに合わせてパスを /main/edit/{id} に変更)
+     * タスク編集画面を表示します (GET /main/edit/{id})
      */
     @GetMapping("/main/edit/{id}")
-    public String editForm(@PathVariable Long id, Model model) {
-        // taskRepository.findById(id).orElseThrow()などでタスクを取得しているか
-        Task task = taskRepository.findById(id).orElse(null); 
-        if (task == null) {
-            // エラーハンドリング
-        }
-        model.addAttribute("task", task); // taskオブジェクトをModelに格納しているか
-        return "edit"; // edit.htmlを返しているか
+    public String showEditForm(
+        @PathVariable Long id, 
+        Model model) {
+        
+        // IDに基づいてDBから既存のタスクを取得
+        Task existingTask = taskRepository.findById(id)
+             .orElseThrow(() -> new RuntimeException("Task not found with ID: " + id));
+        
+        // フォームに表示するためモデルに追加
+        model.addAttribute("task", existingTask);
+        
+        return "edit"; // edit.htmlへ遷移
     }
     
+    // ----------------------------------------------------------------------
+    // ★★★★ 以下のメソッドを更新処理用に修正・統合 ★★★★
+    // ----------------------------------------------------------------------
     /**
-     * タスクを編集・完了処理します (HTMLに合わせてパスを /main/edit/{id} に変更 & IDをURLから取得)
+     * タスクを編集・完了処理します (POST /main/edit/{id})
      */
     @PostMapping("/main/edit/{id}")
-    // ★修正: @ValidatedとBindingResultを追加してバリデーションを有効にする
-    public String editTask(
-        @PathVariable Long id, // ★★★ IDをURLパスから取得 ★★★
-        @Validated @ModelAttribute Task updatedTask,
-        BindingResult bindingResult, // ★ 追記
+    public String updateTask(
+        @PathVariable Long id, 
+        @Validated @ModelAttribute("task") Task updatedTask,
+        BindingResult bindingResult, 
         @AuthenticationPrincipal UserDetails userDetails) {
         
-        // ★追記: バリデーションエラーがあればフォームに戻る
+        // 1. バリデーションエラーがあればフォームに戻る
         if (bindingResult.hasErrors()) {
-             // エラーが発生した場合、URLからのIDをセットし直してからeditビューを返す
-             updatedTask.setId(id);
-             return "edit";
+            updatedTask.setId(id);
+            return "edit";
         }
         
-        // 1. URLから取得したIDをupdatedTaskにセットする (HTMLにhidden idがないため)
-        updatedTask.setId(id);
+     // 2. IDとユーザーIDを設定し、フォームのデータをそのまま保存
+        // ★★★ 既存の複雑なマージロジックを削除し、この2行に置き換える ★★★
+        updatedTask.setId(id); 
+        updatedTask.setUserLoginId(userDetails.getUsername());
         
-        // 2. DBから既存のタスクを取得し、既存データを保護
-        Task existingTask = taskRepository.findById(updatedTask.getId())
-            .orElseThrow(() -> new RuntimeException("Task not found with ID: " + updatedTask.getId()));
-        
-        // 3. フォームから送られた値（nullでないもの）をマージし、既存データを維持する
-
-        // 日付 (date): nullでない場合のみ更新。nullの場合は既存の値を維持する
-        if (updatedTask.getDate() != null) {
-            existingTask.setDate(updatedTask.getDate());
-        }
-
-        // タイトル (title): nullでない場合のみ更新
-        if (updatedTask.getTitle() != null) {
-            existingTask.setTitle(updatedTask.getTitle());
-        }
-
-        // 内容 (text): nullでない場合のみ更新
-        if (updatedTask.getText() != null) {
-            existingTask.setText(updatedTask.getText());
-        }
-        
-        // 完了フラグ (done): フォームから送られてきた値を優先
-        existingTask.setDone(updatedTask.isDone());
-
-        // 4. ユーザーIDを設定し、保存
-        existingTask.setUserLoginId(userDetails.getUsername());
-        taskRepository.save(existingTask);
+        taskRepository.save(updatedTask); // IDがあれば更新として動作する
         
         return "redirect:/main"; // カレンダー画面へ戻る
     }
 
     /**
-     * タスクを削除します (HTMLに合わせてパスを /main/delete/{id} に変更)
+     * タスクを削除します
      */
     @PostMapping("/main/delete/{id}")
     public String deleteTask(@PathVariable Long id) {
