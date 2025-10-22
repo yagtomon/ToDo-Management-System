@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.dmm.task.entity.Task;
+import com.dmm.task.data.Task;
 
 // ★★★ 修正箇所: Integer を Long に変更する ★★★
 public interface TaskRepository extends CrudRepository<Task, Long> {

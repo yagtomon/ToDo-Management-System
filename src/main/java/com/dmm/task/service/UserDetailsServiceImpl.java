@@ -11,7 +11,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service; // ★追加★
 
-import com.dmm.task.entity.Users;
+import com.dmm.task.data.entity.Users;
 import com.dmm.task.repository.UserRepository;
 
 @Service // ★有効化★
@@ -28,8 +28,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Users user = userRepository.findByLoginId(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 権限を設定するためのリストを作成
-        List<GrantedAuthority> authorities = new ArrayList<>();
+List<GrantedAuthority> authorities = new ArrayList<>();
         
         // すべてのユーザーに最低限の権限 (ROLE_USER) を付与
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
@@ -39,11 +38,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         }
 
-        // データベースから取得したユーザー情報と権限を使って UserDetails を作成
         return new User(
             user.getLoginId(),
-            user.getPassword(), // BCryptでエンコードされたパスワード
-            authorities         // 設定された権限
+            user.getPassword(),
+            authorities
         );
     }
 }

@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.dmm.task.entity.Task;
+import com.dmm.task.data.Task;
 import com.dmm.task.repository.TaskRepository;
 
 @Controller

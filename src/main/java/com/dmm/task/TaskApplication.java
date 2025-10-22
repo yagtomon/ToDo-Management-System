@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 // ❌ 修正前: import com.dmm.task.entity.User;
-import com.dmm.task.entity.Users; // 👈 修正: Usersエンティティをインポート
+import com.dmm.task.data.entity.Users; 
 import com.dmm.task.repository.UserRepository;
 
 @SpringBootApplication
