@@ -1,4 +1,4 @@
-// src/main/java/com/dmm/task/data/entity/Task.java
+
 package com.dmm.task.data.entity;
 
 import java.time.LocalDate;
@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import lombok.Data;
 
 @Data
-@Entity(name = "tasks") // テーブル名tasks
+@Entity(name = "tasks") 
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

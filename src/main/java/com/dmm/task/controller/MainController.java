@@ -1,4 +1,4 @@
-// src/main/java/com/dmm/task/controller/MainController.java
+
 package com.dmm.task.controller;
 
 import java.time.DayOfWeek;
@@ -32,9 +32,7 @@ public class MainController {
 
     private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("yyyy年MM月");
 
-    /**
-     * カレンダー表示
-     */
+
     @GetMapping({"/", "/main"})
     public String main(
             @RequestParam(name = "date", required = false) String dateStr,
@@ -141,23 +139,16 @@ public class MainController {
         return "edit";
     }
 
-    /**
-     * タスク更新処理
-     */
     @PostMapping("/main/edit/{id}")
     public String update(
             @PathVariable Integer id,
-            Task task, // 更新内容を受け取る
+            Task task, 
             @AuthenticationPrincipal AccountUserDetails userDetails) {
 
-        // IDとユーザー名をセット（完了チェックがない場合はfalseにするため、一旦DBから取得しなくて良い）
+
         task.setId(id);
         task.setName(userDetails.getName());
-        
-        // チェックボックス未チェック時の処理:
-        // HTMLのチェックボックスが未チェックの場合、Taskオブジェクトのdoneフィールドはデフォルト値(false)になる。
-        // Thymeleaf側で`th:checked="${task.done}"`と記述しているため、更新時に未チェックならfalseが送られる。
-        // そのため、ここでは特に特別な処理は不要。
+
 
         // データベースを更新
         taskRepository.save(task);
@@ -165,30 +156,23 @@ public class MainController {
         // PRGパターンによりカレンダー画面へリダイレクト
         return "redirect:/main";
     }
-    
-    /**
-     * タスク削除処理
-     */
+
     @PostMapping("/main/delete/{id}")
     public String delete(@PathVariable Integer id) {
         // IDに紐づくタスクを削除
         taskRepository.deleteById(id);
         
-        // PRGパターンによりカレンダー画面へリダイレクト
+
         return "redirect:/main";
     }
     
-    /**
-     * ログインフォーム (WebSecurityConfigで設定したパス)
-     */
+
     @GetMapping("/login")
     public String login() {
         return "login";
     }
     
-    /**
-     * アクセス拒否ページ (WebSecurityConfigで設定したパス)
-     */
+
     @GetMapping("/accessDeniedPage")
     public String accessDenied() {
         return "accessDeniedPage"; // accessDeniedPage.html が別途必要

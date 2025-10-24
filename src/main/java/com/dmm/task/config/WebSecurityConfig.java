@@ -77,25 +77,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         // 認可の設定
         http.exceptionHandling()
-            .accessDeniedPage("/login") // アクセス拒否された時に遷移
+            .accessDeniedPage("/login")
             .and()
             .authorizeRequests()
-            .antMatchers("/login").permitAll() // loginFormは、全ユーザからのアクセスを許可
-            .antMatchers("/authenticate").permitAll() // 認証処理のパスも許可
-            .anyRequest().authenticated(); // その他は認証を求める
+            .antMatchers("/login").permitAll() 
+            .antMatchers("/authenticate").permitAll() 
+            .anyRequest().authenticated(); 
 
         // ログイン設定
         http.formLogin()
-            .loginPage("/login") // ログインフォームを表示 するパス
-            .loginProcessingUrl("/authenticate") // フォーム認証処理のパス
-            .usernameParameter("userName") // ユーザ名のリクエストパラメータ名
-            .passwordParameter("password") // パスワードのリクエストパラメータ名
-            .defaultSuccessUrl("/main") // 認証成功時に遷移するデフォルトのパスを要件の「カレンダー」に変更
-            .failureUrl("/login?error=true"); // 認証失敗時に遷移するパス
+            .loginPage("/login") 
+            .loginProcessingUrl("/authenticate") 
+            .usernameParameter("userName") 
+            .passwordParameter("password") 
+            .defaultSuccessUrl("/main") 
+            .failureUrl("/login?error=true"); 
 
         // ログアウト設定
         http.logout()
-            .logoutSuccessUrl("/login") // ログアウト成功時に遷移するパス
-            .permitAll(); // 全ユーザに対して許可
+            .logoutSuccessUrl("/login") 
+            .permitAll();
     }
 }
