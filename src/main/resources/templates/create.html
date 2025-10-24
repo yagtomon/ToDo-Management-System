@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -15,7 +16,7 @@
   <a th:href="@{/main}" class="text">カレンダー</a>
   <div class="border"></div>
   <a
-   th:href="@{/main/create/{date}(date=${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')})}"
+th:href="@{/main/create/{date}(date=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')})}"
    class="text">登録</a>
  </header>
 
@@ -23,32 +24,26 @@
   <div class="form sd">
    <div class="title sd">Regist</div>
    <div class="form_box sd">
-    <form method="post" th:action="@{/main/create}" th:object="${task}">
-     
+    <form method="post" th:action="@{/main/create}">
      <div class="form_row sd">
       <p class="form_text sd">タイトル：</p>
       <div class="form_item">
-       <input type="text" th:field="*{title}" class="item">
+       <input type="text" name="title" class="item">
       </div>
-      <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="error"></span>
      </div>
-     
-     <div class="form_row sd">
-      <p class="form_text sd">日付：</p>
-      <div class="form_item">
-       <input type="date" th:field="*{date}" class="item">
-      </div>
-      <span th:if="${#fields.hasErrors('date')}" th:errors="*{date}" class="error"></span>
+	 <div class="form_row sd">
+	     <p class="form_text sd">日付：</p>
+	     <div class="form_item">
+	         <input type="date" name="date" th:value="${date}" class="item">
+	     </div>
+	 </div>
      </div>
-     
      <div class="form_row sd">
       <p class="form_text sd">内容:</p>
       <div class="form_item">
-       <textarea th:field="*{text}" cols="80" rows="10" class="item"></textarea>
+       <textarea name="text" cols="80" rows="10" class="item"></textarea>
       </div>
-      <span th:if="${#fields.hasErrors('text')}" th:errors="*{text}" class="error"></span>
      </div>
-     
      <button class="form_button sd">
       <p class="form_button_text sd text">投稿</p>
      </button>
@@ -58,3 +53,4 @@
  </div>
 </body>
 </html>
+

@@ -20,7 +20,7 @@
   <a th:href="@{/main}" class="text">カレンダー</a>
   <div class="border"></div>
   <a
-   th:href="@{/main/create/{date}(date=${#calendars.format(#calendars.createNow(), 'yyyy-MM-dd')})}"
+th:href="@{/main/create/{date}(date=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')})}"
    class="text">登録</a>
  </header>
 

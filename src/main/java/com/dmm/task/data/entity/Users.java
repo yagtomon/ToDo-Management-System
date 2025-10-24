@@ -1,19 +1,18 @@
-package com.dmm.task.data.entity; 
+// src/main/java/com/dmm/task/data/entity/Users.java
+package com.dmm.task.data.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-
 import lombok.Data;
 import lombok.ToString;
 
 @Data
-@Entity
-@ToString(exclude = "password")
+@Entity // データベースの情報を格納する
+@ToString(exclude = "password") // パスワードをログ出力から除外
 public class Users {
-    
     @Id
-    public String loginId; // DBの列名 'login_id' に対応
-    
-    public String password; // DBの列名 'password' に対応
-
+    public String userName;
+    public String password;
+    public String name;
+    public String roleName;
 }

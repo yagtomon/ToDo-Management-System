@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
  xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -14,11 +15,11 @@
     <div th:if="${param.error}">
      <div>UserNameまたは、Passwordが違います。</div>
     </div>
-    <form method="post" th:action="@{/login}"
+    <form method="post" th:action="@{/authenticate}"
      style="width: 400px">
      <div class="form_box_inner">
       <p class="text sd">ユーザーID</p>
-      <input class="item" type="text" id="username" name="username">
+      <input class="item" type="text" id="userName" name="userName">
      </div>
      <div class="form_box_inner">
       <p class="text sd">パスワード</p>
