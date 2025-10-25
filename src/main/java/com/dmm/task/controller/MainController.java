@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
-
+import java.util.Calendar; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -18,11 +18,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.dmm.task.data.entity.Task;
 import com.dmm.task.data.repository.TaskRepository;
 import com.dmm.task.service.AccountUserDetails;
+
 
 @Controller
 public class MainController {
@@ -38,6 +37,8 @@ public class MainController {
             @RequestParam(name = "date", required = false) String dateStr,
             @AuthenticationPrincipal AccountUserDetails userDetails,
             Model model) {
+        
+        model.addAttribute("calendars", Calendar.getInstance()); 
 
         // 1. 表示する月の初日を取得
         LocalDate now = dateStr == null ? LocalDate.now() : LocalDate.parse(dateStr);
@@ -58,7 +59,7 @@ public class MainController {
         LocalDate currentDate = firstDate;
         
         // 5. カレンダーを埋める
-        while (currentDate.isBefore(monthLastDate) || currentDate.isEqual(monthLastDate) || matrix.size() < 6) {
+        while (currentDate.isBefore(monthLastDate) || currentDate.isEqual(monthLastDate) || matrix.size() < 5) {
             week.add(currentDate);
 
             if (currentDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
@@ -81,7 +82,7 @@ public class MainController {
         // 6. タスクの取得とModelへの設定
         List<Task> tasks;
         // 管理者(admin)かどうかを判定
-        boolean isAdmin = userDetails.getUser().getRoleName().equals("ROLE_ADMIN");
+        boolean isAdmin = userDetails.getUser().getRoleName().equals("ROLE_ADMIN"); 
 
         if (isAdmin) {
             // 管理者の場合、全ユーザーのタスクを取得
@@ -101,18 +102,16 @@ public class MainController {
         return "main";
     }
 
-    /**
-     * タスク登録画面表示
-     */
+
     @GetMapping("/main/create/{date}")
     public String create(@PathVariable String date, Model model) {
-        model.addAttribute("date", date);
+        LocalDate localDate = LocalDate.parse(date);
+        model.addAttribute("date", localDate);
+        model.addAttribute("calendars", java.util.Calendar.getInstance()); 
+      
         return "create";
     }
 
-    /**
-     * タスク登録処理
-     */
     @PostMapping("/main/create")
     public String register(
             Task task, // Taskエンティティを直接受け取る
@@ -128,12 +127,11 @@ public class MainController {
         return "redirect:/main"; 
     }
 
-    /**
-     * タスク編集画面表示
-     */
+
     @GetMapping("/main/edit/{id}")
     public String edit(@PathVariable Integer id, Model model) {
-        // IDに紐づくタスクを取得
+        
+        model.addAttribute("calendars", java.util.Calendar.getInstance()); 
         Task task = taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid task Id:" + id));
         model.addAttribute("task", task);
         return "edit";
@@ -150,10 +148,8 @@ public class MainController {
         task.setName(userDetails.getName());
 
 
-        // データベースを更新
         taskRepository.save(task);
         
-        // PRGパターンによりカレンダー画面へリダイレクト
         return "redirect:/main";
     }
 
@@ -175,6 +171,6 @@ public class MainController {
 
     @GetMapping("/accessDeniedPage")
     public String accessDenied() {
-        return "accessDeniedPage"; // accessDeniedPage.html が別途必要
+        return "login";
     }
 }
