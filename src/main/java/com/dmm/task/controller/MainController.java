@@ -8,6 +8,11 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+
 import java.util.Map;
 import java.util.Calendar; 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +30,8 @@ import com.dmm.task.service.AccountUserDetails;
 
 @Controller
 public class MainController {
-
+	@PersistenceContext
+    private EntityManager entityManager;
     @Autowired
     private TaskRepository taskRepository;
 
@@ -59,7 +65,12 @@ public class MainController {
         LocalDate currentDate = firstDate;
         
         // 5. カレンダーを埋める
-        while (currentDate.isBefore(monthLastDate) || currentDate.isEqual(monthLastDate) || matrix.size() < 5) {
+while (currentDate.isBefore(monthLastDate) || currentDate.isEqual(monthLastDate) || !week.isEmpty()) {
+            
+            if (currentDate.isAfter(monthLastDate) && week.isEmpty()) {
+                break;
+            }
+
             week.add(currentDate);
 
             if (currentDate.getDayOfWeek() == DayOfWeek.SATURDAY) {
@@ -67,6 +78,7 @@ public class MainController {
                 week = new ArrayList<>();
             }
             currentDate = currentDate.plusDays(1);
+        
         }
         // 最終週が土曜日で終わらない場合の処理 (翌月分を埋める)
         if (!week.isEmpty()) {
@@ -74,26 +86,25 @@ public class MainController {
                 week.add(currentDate);
                 currentDate = currentDate.plusDays(1);
             }
-            matrix.add(week);
+            // 💡 修正ステップ1：最後の週をmatrixに確実に追加する
+            matrix.add(week); 
         }
 
         model.addAttribute("matrix", matrix);
 
-        // 6. タスクの取得とModelへの設定
         List<Task> tasks;
-        // 管理者(admin)かどうかを判定
-        boolean isAdmin = userDetails.getUser().getRoleName().equals("ROLE_ADMIN"); 
+        boolean isAdmin = userDetails.getUser().getRoleName().trim().equals("ROLE_ADMIN"); 
 
         if (isAdmin) {
-            // 管理者の場合、全ユーザーのタスクを取得
-            tasks = taskRepository.findByDateBetween(firstDate, currentDate.minusDays(1)); // currentDateはループの次の日になっているので-1
+            entityManager.clear(); 
+            
+            tasks = taskRepository.findByDateBetween(firstDate, currentDate.minusDays(1)); 
+
         } else {
-            // 一般ユーザーの場合、自身のタスクのみを取得
             String name = userDetails.getName();
             tasks = taskRepository.findByDateBetweenAndName(firstDate, currentDate.minusDays(1), name);
         }
         
-        // LocalDateをキー、その日のタスクリストを値とするMapに変換
         Map<LocalDate, List<Task>> tasksMap = tasks.stream()
             .collect(Collectors.groupingBy(Task::getDate));
         
@@ -138,27 +149,25 @@ public class MainController {
     }
 
     @PostMapping("/main/edit/{id}")
+    @Transactional 
     public String update(
             @PathVariable Integer id,
-            Task task, 
+            Task task,
             @AuthenticationPrincipal AccountUserDetails userDetails) {
 
+        Task existingTask = taskRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Invalid task Id:" + id));
 
-        task.setId(id);
-        task.setName(userDetails.getName());
-
-
-        taskRepository.save(task);
+        existingTask.setTitle(task.getTitle());
+        existingTask.setDate(task.getDate());
+        existingTask.setText(task.getText());
+        existingTask.setDone(task.isDone()); 
         
-        return "redirect:/main";
-    }
+        taskRepository.save(existingTask);
+        entityManager.flush(); 
 
-    @PostMapping("/main/delete/{id}")
-    public String delete(@PathVariable Integer id) {
-        // IDに紐づくタスクを削除
-        taskRepository.deleteById(id);
-        
-
+        entityManager.clear();
+ 
         return "redirect:/main";
     }
     

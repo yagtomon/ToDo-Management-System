@@ -1,4 +1,3 @@
-
 package com.dmm.task.data.repository;
 
 import java.time.LocalDate;
@@ -6,11 +5,13 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import javax.persistence.QueryHint; 
+import org.springframework.data.jpa.repository.QueryHints;
+
 import com.dmm.task.data.entity.Task;
 
 public interface TaskRepository extends JpaRepository<Task, Integer> {
-
-    // 特定期間の全ユーザーのタスクを取得 (管理者用)
+    @QueryHints({ @QueryHint(name = "org.hibernate.cacheable", value = "false") })
     @Query("select a from tasks a where a.date between :from and :to")
     List<Task> findByDateBetween(@Param("from") LocalDate from, @Param("to") LocalDate to);
 
