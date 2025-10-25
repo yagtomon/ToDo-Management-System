@@ -14,7 +14,6 @@ public class AccountUserDetails implements UserDetails {
         this.user = user;
     }
 
-    // 権限リストを返す ("ROLE_" + ロール名)
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return AuthorityUtils.createAuthorityList("ROLE_" + user.getRoleName());
@@ -34,7 +33,6 @@ public class AccountUserDetails implements UserDetails {
         return user.getName();
     }
     
-    // 以下はすべてtrueを返す
     @Override
     public boolean isAccountNonExpired() { return true; }
 

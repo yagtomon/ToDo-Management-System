@@ -38,11 +38,11 @@ public class MainController {
             @AuthenticationPrincipal AccountUserDetails userDetails,
             Model model) {
 
-        model.addAttribute("calendars", Calendar.getInstance()); 
+        model.addAttribute("calendars", Calendar.getInstance());
 
         LocalDate now = dateStr == null ? LocalDate.now() : LocalDate.parse(dateStr);
         LocalDate monthFirstDate = now.with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate monthLastDate = now.with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate monthLastDate  = now.with(TemporalAdjusters.lastDayOfMonth());
 
         model.addAttribute("prev", now.minusMonths(1));
         model.addAttribute("next", now.plusMonths(1));
@@ -50,7 +50,6 @@ public class MainController {
 
         List<List<LocalDate>> matrix = new ArrayList<>();
         List<LocalDate> week = new ArrayList<>();
-
         LocalDate firstDate = monthFirstDate.minusDays(monthFirstDate.getDayOfWeek().getValue() % 7);
         LocalDate currentDate = firstDate;
 
@@ -65,7 +64,6 @@ public class MainController {
             }
             currentDate = currentDate.plusDays(1);
         }
-
         if (!week.isEmpty()) {
             while (week.size() < 7) {
                 week.add(currentDate);
@@ -74,25 +72,29 @@ public class MainController {
             matrix.add(week);
         }
 
+        LocalDate lastShownDate = currentDate.minusDays(1);
+
         model.addAttribute("matrix", matrix);
 
         List<Task> tasks;
-        boolean isAdmin = userDetails.getUser().getRoleName().trim().equals("ADMIN"); // ✅ 修正
+        boolean isAdmin = userDetails.getUser().getRoleName().trim().equals("ADMIN");
 
         if (isAdmin) {
             entityManager.clear();
-            tasks = taskRepository.findByDateBetween(monthFirstDate, monthLastDate); // ✅ 修正
+            tasks = taskRepository.findByDateBetween(firstDate, lastShownDate);
         } else {
             String name = userDetails.getName();
-            tasks = taskRepository.findByDateBetweenAndName(monthFirstDate, monthLastDate, name);
+            tasks = taskRepository.findByDateBetweenAndName(firstDate, lastShownDate, name);
         }
 
         Map<LocalDate, List<Task>> tasksMap = tasks.stream()
                 .collect(Collectors.groupingBy(Task::getDate));
 
         model.addAttribute("tasks", tasksMap);
+
         return "main";
     }
+
 
     @GetMapping("/main/create/{date}")
     public String create(@PathVariable String date, Model model) {

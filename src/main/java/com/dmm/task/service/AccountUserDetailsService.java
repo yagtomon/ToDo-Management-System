@@ -21,11 +21,9 @@ public class AccountUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("ユーザー名が空です");
         }
         
-        // データベースからアカウント情報を取得
         Users user = repository.findById(userName)
                                 .orElseThrow(() -> new UsernameNotFoundException(userName + "は見つかりません。"));
 
-        // UserDetailsの実装クラスを生成して返す
         return new AccountUserDetails(user);
     }
 }
